@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Ad Blocker Settings</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f1115;
+      --card: #1b1f27;
+      --accent: #ff4500;
+      --text: #f2f3f5;
+      --muted: #9aa3b2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    p.sub { color: var(--muted); margin-top: 0; }
+    section {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    section h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 0 0 14px; }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #262b35;
+    }
+    .row:last-child { border-bottom: none; }
+    .row .desc { font-size: 12px; color: var(--muted); margin-top: 2px; max-width: 420px; }
+    .row .label { font-size: 14px; font-weight: 600; }
+
+    label.switch { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+    label.switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background-color: #3a3f4b; transition: .2s; border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: .2s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--accent); }
+    input:checked + .slider:before { transform: translateX(18px); }
+
+    .whitelist-add { display: flex; gap: 8px; margin-bottom: 12px; }
+    .whitelist-add input {
+      flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid #2c3140;
+      background: #12151a; color: var(--text); font-size: 13px;
+    }
+    .whitelist-add button, .stat-reset {
+      background: var(--accent); border: none; color: white; border-radius: 8px;
+      padding: 8px 14px; font-size: 13px; cursor: pointer; font-weight: 600;
+    }
+    ul#whitelistItems { list-style: none; margin: 0; padding: 0; }
+    ul#whitelistItems li {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid #262b35; font-size: 13px;
+    }
+    ul#whitelistItems li:last-child { border-bottom: none; }
+    ul#whitelistItems button {
+      background: none; border: none; color: #ff5c5c; cursor: pointer; font-size: 12px;
+    }
+    .empty { color: var(--muted); font-size: 12px; font-style: italic; }
+    footer { margin-top: 24px; color: var(--muted); font-size: 11px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>Ad Blocker Settings</h1>
+  <p class="sub">Fine-tune protection, then close this tab — everything saves automatically.</p>
+
+  <section>
+    <h2>Protection</h2>
+    <div class="row">
+      <div>
+        <div class="label">Network-level blocking</div>
+        <div class="desc">Blocks known ad/tracker requests before they load, using ~90 domain rules.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="networkBlocking" />
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">Cosmetic filtering</div>
+        <div class="desc">Hides leftover ad containers / blank boxes left behind after a blocked request.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="cosmeticFiltering" />
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="row">
+      <div>
+        <div class="label">YouTube ad skip</div>
+        <div class="desc">Mutes, fast-forwards, and auto-clicks "Skip Ad" on YouTube video ads.</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="youtubeAdSkip" />
+        <span class="slider"></span>
+      </label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Whitelisted sites</h2>
+    <div class="whitelist-add">
+      <input type="text" id="whitelistInput" placeholder="example.com" />
+      <button id="addWhitelist">Add</button>
+    </div>
+    <ul id="whitelistItems"></ul>
+    <p class="empty" id="emptyState">No whitelisted sites yet.</p>
+  </section>
+
+  <section>
+    <h2>Stats</h2>
+    <div class="row">
+      <div>
+        <div class="label" id="statsSummary">0 ads blocked so far</div>
+        <div class="desc">Resets the counters shown in the toolbar popup.</div>
+      </div>
+      <button class="stat-reset" id="resetStats">Reset</button>
+    </div>
+  </section>
+
+  <footer>Ad Blocker v2.0 — network blocking, cosmetic filtering &amp; YouTube ad skip.</footer>
+
+  <script src="options.js"></script>
+</body>
+</html>

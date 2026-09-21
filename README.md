@@ -1,54 +1,62 @@
-# Brave-Style Ad Blocker (Chrome Extension)
+# Ad Blocker v2.0
 
-A lightweight, performance-focused Google Chrome extension built on **Manifest V3** that mimics Brave Browser's native engine. It blocks malicious ad networks at the network layer and dynamically bypasses complex first-party video advertisements on platforms like YouTube.
+A from-scratch rebuild of the original extension, fixing the invalid-manifest
+bug and closing the gaps that kept it from being a real ad blocker.
 
----
+## What it does
 
-## 🚀 Key Features
+- **Network-level blocking** — `rules.json` ships ~90 known ad/tracker
+  domains (Google's ad stack, DoubleClick, Taboola/Outbrain, Criteo,
+  Rubicon/PubMatic/OpenX, DoubleVerify, social trackers, etc.) plus common
+  ad-path patterns, all enforced natively via `declarativeNetRequest` — no
+  network round-trip through the extension needed.
+- **Cosmetic filtering** — a content script hides leftover ad containers
+  (empty boxes, `ins.adsbygoogle`, `div[id^="div-gpt-ad"]`, Taboola/Outbrain
+  widgets, etc.) so pages don't show blank ad-shaped gaps, and keeps
+  watching the DOM via `MutationObserver` for ones injected after load.
+- **YouTube ad skip** — reacts instantly to the player's `ad-showing` class
+  via `MutationObserver` (instead of polling every 500ms), mutes, jumps to
+  the end of the ad, and auto-clicks "Skip Ad" the moment it's clickable.
+  A 2s safety-net poll covers cases where YouTube's markup shifts.
+- **Per-site whitelist** — toggle protection off for the current site from
+  the popup (or manage the list from the options page). This adds a
+  high-priority `declarativeNetRequest` session "allow" rule for that
+  domain, so network blocking, cosmetic filtering, and YouTube skip all
+  respect it.
+- **Live stats** — ads blocked, estimated MB saved, estimated seconds
+  saved, shown in the popup and badge. Counted via an observational
+  (non-blocking) `webRequest` listener, which — unlike
+  `onRuleMatchedDebug` — actually works once the extension is packed and
+  published, not just when loaded unpacked for development.
+- **Options page** — independent toggles for network blocking, cosmetic
+  filtering, and YouTube ad skip, plus whitelist management.
 
-* **Network-Level Interception:** Uses the modern `chrome.declarativeNetRequest` API to block trackers and ad networks before web pages even load, saving user bandwidth.
-* **YouTube Video Ad Bypass Engine:** A mutation-resilient content script that instantly fast-forwards, mutes, and auto-skips structural video advertisements seamlessly.
-* **Live Analytical Dashboard:** A clean popup UI displaying key protection metrics updated in real-time using chrome local storage:
-  * Total Ads Blocked
-  * Approximate Bandwidth Saved (MB)
-  * Estimated Browsing Time Saved (seconds)
-* **Local Metrics Control:** Includes a state-clearing mechanism to reset internal statistical counters instantaneously.
+## Load it
 
----
+1. `chrome://extensions` → enable **Developer mode**.
+2. **Load unpacked** → select this folder.
+3. Pin the toolbar icon to see live stats.
 
-## 🛠️ Architecture & Tech Stack
+## Files
 
-* **Frontend UI:** HTML5, CSS3 (Vanilla components designed for low memory footprint).
-* **Core API Ecosystem:** Chrome Extension API (Manifest V3 Compliance).
-  * `declarativeNetRequest` (High-performance declarative URL filtering).
-  * `storage.local` (Asynchronous local data persistence).
-  * `runtime.sendMessage` (Decoupled cross-script background communication).
-* **Injected Automation:** JavaScript (DOM manipulation and structural injection loops).
+| File | Purpose |
+|---|---|
+| `manifest.json` | MV3 manifest |
+| `rules.json` | Static `declarativeNetRequest` block rules |
+| `domains.js` | Domain list shared by the rule generator and `background.js`'s stats matcher |
+| `background.js` | Service worker: stats, whitelist session rules |
+| `content-cosmetic.js` | Hides leftover ad containers on all non-YouTube sites |
+| `content-youtube.js` | YouTube-specific ad skip |
+| `popup.html` / `popup.js` | Toolbar popup: stats + per-site toggle |
+| `options.html` / `options.js` | Settings page |
+| `gen_rules.py` | Script used to (re)generate `rules.json` / `domains.js` from the domain list |
 
----
+## Known limits (be upfront about these)
 
-## 📂 Project Structure
-
-```text
-Chrome-Extension-AdBlocker/
-├── manifest.json      # Extension architecture & permission routing
-├── rules.json         # Static declarative blocking rule configurations
-├── background.js      # Decoupled backend service worker & message hub
-├── content.js         # Isolated DOM manipulation script for YouTube
-├── popup.html         # Live analytics user interface layout
-├── popup.js           # UI data binding & interaction controller
-└── icon.png           # 128x128 extension graphics asset
-```
-
----
-
-## ⚙️ Engineering Highlights (Interview Discussion Points)
-
-### 1. Manifest V3 & Performance Efficiency
-Unlike older extensions that relied on blocking web requests via blocking web request APIs—which slow down the main execution thread—this project strictly adheres to **Manifest V3 standards**. By offloading domain blocking to Chrome's native engine via `rules.json`, network performance is heavily optimized.
-
-### 2. Solving First-Party Ad Hurdles (The YouTube Problem)
-Because platforms serve advertisements from identical endpoints as their primary media streams (`*.googlevideo.com`), network blocking alone fails. This extension solves that hurdle through an isolated **Content Script** tracking system. It detects ad-display containers, forces playback speeds to maximum limits (16.0×), mutes audio, and triggers safe programmatic clicks on hidden skip elements within 500ms intervals.
-
-### 3. Decoupled Message Passing
-The background service worker acts as a centralized events highway. It listens synchronously for internal system hits from matching domain rules while maintaining an asynchronous runtime listener to process incoming skip events emitted by the custom content engine on active tabs.
+- ~90 domains is solid coverage of the biggest ad networks, but it's not
+  EasyList's tens of thousands of entries — some smaller/regional ad
+  networks will slip through.
+- Cosmetic selectors are generic; a handful of sites with unusual class
+  names for ad slots may still show empty containers.
+- YouTube changes its player markup periodically; the skip-button selector
+  list may need occasional updates if YouTube renames classes again.

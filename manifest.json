@@ -1,37 +1,62 @@
 {
   "manifest_version": 3,
   "name": "Brave-Style Ad Blocker",
-  "version": "1.1",
-  "description": "Blocks ads and skips YouTube video ads.",
+  "version": "2.0",
+  "description": "Blocks ads and trackers network-wide, hides leftover ad containers, and skips YouTube video ads — with per-site whitelisting and a live stats dashboard.",
   "permissions": [
     "declarativeNetRequest",
-    "storage"
+    "storage",
+    "webRequest",
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
   "declarative_net_request": {
-    "rule_resources": [{
-      "id": "ruleset_1",
-      "enabled": true,
-      "path": "rules.json"
-    }]
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
+      "matches": ["<all_urls>"],
+      "exclude_matches": [
+        "*://*.youtube.com/*",
+        "*://youtube.com/*",
+        "*://*.youtube-nocookie.com/*"
+      ],
+      "js": ["content-cosmetic.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    },
+    {
       "matches": [
         "https://www.youtube.com/*",
-        "https://youtube.com/*"
+        "https://youtube.com/*",
+        "https://m.youtube.com/*",
+        "https://www.youtube-nocookie.com/*"
       ],
-      "js": ["content.js"],
+      "js": ["content-youtube.js"],
       "run_at": "document_idle"
     }
   ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": "icon.png"
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
   }
 }

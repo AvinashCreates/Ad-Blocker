@@ -1,34 +1,115 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8" />
   <style>
-    body { width: 220px; font-family: Arial, sans-serif; padding: 10px; margin: 0; background: #f9f9f9; }
-    .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
-    h2 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
-    .stat { font-size: 22px; font-weight: bold; color: #ff4500; margin: 5px 0; }
-    .label { font-size: 11px; color: #666; margin-bottom: 15px; }
-    .reset-btn { 
-      width: 100%; background: #e0e0e0; color: #333; border: none; 
-      padding: 8px; border-radius: 4px; font-size: 12px; cursor: pointer; 
-      font-weight: bold; transition: background 0.2s;
+    :root {
+      color-scheme: light dark;
+      --bg: #12151a;
+      --card: #1b1f27;
+      --accent: #ff4500;
+      --text: #f2f3f5;
+      --muted: #9aa3b2;
+      --green: #3ddc84;
+      --red: #ff5c5c;
     }
-    .reset-btn:hover { background: #d4d4d4; }
+    * { box-sizing: border-box; }
+    body {
+      width: 320px;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px;
+      border-bottom: 1px solid #262b35;
+    }
+    header img { width: 28px; height: 28px; border-radius: 6px; }
+    header h1 { font-size: 15px; margin: 0; font-weight: 600; }
+    header p { margin: 2px 0 0; font-size: 11px; color: var(--muted); }
+
+    .site-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--card);
+      margin: 12px 16px 0;
+      border-radius: 10px;
+    }
+    .site-row .host { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+    .toggle-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .toggle-btn.on { background: var(--green); color: #08240f; }
+    .toggle-btn.off { background: var(--red); color: #2a0808; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 16px;
+    }
+    .stat {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+    .stat .num { font-size: 18px; font-weight: 700; color: var(--accent); }
+    .stat .label { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 16px 16px;
+    }
+    footer button {
+      background: none;
+      border: 1px solid #2c3140;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    footer button:hover { border-color: var(--accent); }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>My Protection Stats</h2>
-    <div class="stat" id="ads">0</div>
-    <div class="label">Ads Blocked</div>
-    
-    <div class="stat" id="data">0 MB</div>
-    <div class="label">Bandwidth Saved</div>
-    
-    <div class="stat" id="time">0s</div>
-    <div class="label">Time Saved</div>
+  <header>
+    <img src="icon.png" alt="" />
+    <div>
+      <h1>Ad Blocker</h1>
+      <p id="statusLine">Protecting this browser</p>
+    </div>
+  </header>
 
-    <button id="reset" class="reset-btn">Reset Statistics</button>
+  <div class="site-row">
+    <span class="host" id="hostLabel">this site</span>
+    <button class="toggle-btn on" id="siteToggle">Enabled</button>
   </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="adsBlocked">0</div><div class="label">ADS BLOCKED</div></div>
+    <div class="stat"><div class="num" id="dataSaved">0</div><div class="label">MB SAVED</div></div>
+    <div class="stat"><div class="num" id="timeSaved">0</div><div class="label">SEC SAVED</div></div>
+  </div>
+
+  <footer>
+    <button id="resetStats">Reset stats</button>
+    <button id="openOptions">Settings</button>
+  </footer>
+
   <script src="popup.js"></script>
 </body>
 </html>
